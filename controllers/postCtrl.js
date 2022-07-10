@@ -32,7 +32,22 @@ const postCtrl = {
 	},
 	getAll: async (req, res) => {
 		try {
-			const posts = await Post.find()
+			const username = req.query.username
+			const category = req.query.category
+
+			let posts
+
+			if (username) {
+				posts = await Post.find({ username })
+			} else if (category) {
+				posts = await Post.find({
+					categories: {
+						$in: [category],
+					},
+				})
+			} else {
+				posts = await Post.find()
+			}
 
 			return res.status(200).json({
 				message: 'Posts fetched successfully',

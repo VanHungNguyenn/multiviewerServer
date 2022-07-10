@@ -11,9 +11,9 @@ const createAccessToken = (payload) => {
 const userCtrl = {
 	register: async (req, res) => {
 		try {
-			const { username, password, email } = req.body
+			const { username, password, email, key } = req.body
 
-			if (!username || !password || !email) {
+			if (!username || !password || !email || !key) {
 				return res.status(400).json({
 					message: 'Please provide all required fields',
 				})
@@ -22,6 +22,12 @@ const userCtrl = {
 			if (password.length < 6) {
 				return res.status(400).json({
 					message: 'Password must be at least 6 characters',
+				})
+			}
+
+			if (key !== process.env.AUTH_KEY) {
+				return res.status(400).json({
+					message: 'Invalid Authentication',
 				})
 			}
 
@@ -46,7 +52,7 @@ const userCtrl = {
 					message: 'User created successfully',
 				})
 			})
-		} catch (err) {
+		} catch (error) {
 			return res.status(500).json({
 				message: error.message,
 			})
@@ -92,7 +98,27 @@ const userCtrl = {
 				message: 'Login successful',
 				accessToken,
 			})
-		} catch (err) {
+		} catch (error) {
+			return res.status(500).json({
+				message: error.message,
+			})
+		}
+	},
+	getInfor: async (req, res) => {
+		try {
+			const user = await User.findById(req.user.id)
+
+			if (!user) {
+				return res.status(400).json({
+					message: 'User does not exist',
+				})
+			}
+
+			return res.status(200).json({
+				message: 'User information',
+				user,
+			})
+		} catch (error) {
 			return res.status(500).json({
 				message: error.message,
 			})

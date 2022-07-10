@@ -12,9 +12,9 @@ const path = require('path')
 const app = express()
 
 // middleware
+app.use(cors())
 app.use(express.json())
 app.use(cookieParser())
-app.use(cors())
 
 // DB configs
 const db = process.env.MONGO_URI
