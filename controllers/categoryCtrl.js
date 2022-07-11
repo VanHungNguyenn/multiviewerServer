@@ -11,16 +11,25 @@ const categoryCtrl = {
 				})
 			}
 
+			const check = await Category.findOne({ name })
+
+			if (check) {
+				return res.status(400).json({
+					message: 'Category already exists',
+				})
+			}
+
 			const category = new Category({
 				name,
 			})
 
 			await category.save().then(() => {
 				return res.status(200).json({
+					category,
 					message: 'Category created successfully',
 				})
 			})
-		} catch (err) {
+		} catch (error) {
 			return res.status(500).json({
 				message: error.message,
 			})
@@ -34,7 +43,7 @@ const categoryCtrl = {
 				message: 'Categories fetched successfully',
 				categories,
 			})
-		} catch (err) {
+		} catch (error) {
 			return res.status(500).json({
 				message: error.message,
 			})

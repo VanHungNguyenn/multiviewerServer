@@ -12,12 +12,15 @@ const path = require('path')
 const app = express()
 
 // middleware
-app.use(cors())
 app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
+app.use(cors())
 
 // DB configs
 const db = process.env.MONGO_URI
+
+app.use('/images', express.static(path.join(__dirname, '/images')))
 
 mongoose.connect(db, (err) => {
 	if (err) throw err
@@ -35,14 +38,9 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage })
 
-app.get('/', (req, res) => {
-	res.send('WELCOME TO MULTIVIEWER SERVER')
-})
-
+app.use('/api/post', require('./routes/postRouter'))
 app.use('/api/user', require('./routes/userRouter'))
 app.use('/api/category', require('./routes/categoryRouter'))
-app.use('/api/post', require('./routes/postRouter'))
-app.use('/images', express.static(path.join(__dirname, '/images')))
 app.post('/api/upload', upload.single('file'), (req, res) => {
 	res.status(200).json('File has been uploaded')
 })

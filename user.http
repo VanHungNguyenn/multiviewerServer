@@ -1,0 +1,6 @@
+POST http://localhost:5555/api/category/create
+Content-Type: application/json
+
+{
+    "name": "category 3"
+}

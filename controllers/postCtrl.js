@@ -3,9 +3,17 @@ const Post = require('../models/PostModel')
 const postCtrl = {
 	create: async (req, res) => {
 		try {
-			const { title, username, photo, desc, categories } = req.body
+			const { title, username, photo, content, categories, photoAvatar } =
+				req.body
 
-			if (!title || !username || !photo || !desc || !categories) {
+			if (
+				!title ||
+				!username ||
+				!photo ||
+				!content ||
+				!categories ||
+				!photoAvatar
+			) {
 				return res.status(400).json({
 					message: 'Please provide all required fields',
 				})
@@ -15,16 +23,18 @@ const postCtrl = {
 				title,
 				username,
 				photo,
-				desc,
+				content,
 				categories,
+				photoAvatar,
 			})
 
 			await post.save().then(() => {
 				return res.status(200).json({
+					post,
 					message: 'Post created successfully',
 				})
 			})
-		} catch (err) {
+		} catch (error) {
 			return res.status(500).json({
 				message: error.message,
 			})
@@ -53,7 +63,7 @@ const postCtrl = {
 				message: 'Posts fetched successfully',
 				posts,
 			})
-		} catch (err) {
+		} catch (error) {
 			return res.status(500).json({
 				message: error.message,
 			})
@@ -73,7 +83,41 @@ const postCtrl = {
 				message: 'Post fetched successfully',
 				post,
 			})
-		} catch (err) {
+		} catch (error) {
+			return res.status(500).json({
+				message: error.message,
+			})
+		}
+	},
+	getRelatedPosts: async (req, res) => {
+		try {
+			let post = await Post.findById(req.params.id)
+
+			if (!post) {
+				return res.status(404).json({
+					message: 'Post not found',
+				})
+			}
+
+			const categories = post.categories
+
+			let posts = await Post.find({
+				categories: {
+					$in: categories,
+				},
+			})
+
+			posts = posts
+				.filter((post) => {
+					return post._id.toString() !== req.params.id
+				})
+				.slice(0, 3)
+
+			return res.status(200).json({
+				message: 'Posts fetched successfully',
+				posts,
+			})
+		} catch (error) {
 			return res.status(500).json({
 				message: error.message,
 			})
@@ -95,7 +139,7 @@ const postCtrl = {
 				message: 'Post updated successfully',
 				post,
 			})
-		} catch (err) {
+		} catch (error) {
 			return res.status(500).json({
 				message: error.message,
 			})
@@ -114,7 +158,7 @@ const postCtrl = {
 			return res.status(200).json({
 				message: 'Post deleted successfully',
 			})
-		} catch (err) {
+		} catch (error) {
 			return res.status(500).json({
 				message: error.message,
 			})
