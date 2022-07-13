@@ -27,6 +27,10 @@ const postSchema = new mongoose.Schema(
 			type: Array,
 			required: true,
 		},
+		slug: {
+			type: String,
+			required: true,
+		},
 	},
 	{
 		timestamps: true,

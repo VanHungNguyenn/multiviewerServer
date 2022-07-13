@@ -1,4 +1,5 @@
 const Post = require('../models/PostModel')
+const slugify = require('slugify')
 
 const postCtrl = {
 	create: async (req, res) => {
@@ -19,6 +20,8 @@ const postCtrl = {
 				})
 			}
 
+			const slug = slugify(title, { lower: true })
+
 			const post = new Post({
 				title,
 				username,
@@ -26,6 +29,7 @@ const postCtrl = {
 				content,
 				categories,
 				photoAvatar,
+				slug,
 			})
 
 			await post.save().then(() => {
@@ -69,6 +73,26 @@ const postCtrl = {
 			})
 		}
 	},
+	getPostBySlug: async (req, res) => {
+		try {
+			const post = await Post.findOne({ slug: req.params.slug })
+
+			if (!post) {
+				return res.status(404).json({
+					message: 'Post not found',
+				})
+			}
+
+			return res.status(200).json({
+				message: 'Post fetched successfully',
+				post,
+			})
+		} catch (error) {
+			return res.status(500).json({
+				message: error.message,
+			})
+		}
+	},
 	getPostById: async (req, res) => {
 		try {
 			const post = await Post.findById(req.params.id)
@@ -91,7 +115,7 @@ const postCtrl = {
 	},
 	getRelatedPosts: async (req, res) => {
 		try {
-			let post = await Post.findById(req.params.id)
+			let post = await Post.findOne({ slug: req.params.slug })
 
 			if (!post) {
 				return res.status(404).json({
@@ -109,7 +133,7 @@ const postCtrl = {
 
 			posts = posts
 				.filter((post) => {
-					return post._id.toString() !== req.params.id
+					return post.slug.toString() !== req.params.slug
 				})
 				.slice(0, 3)
 
