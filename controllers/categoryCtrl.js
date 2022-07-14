@@ -49,6 +49,70 @@ const categoryCtrl = {
 			})
 		}
 	},
+	updatePostById: async (req, res) => {
+		try {
+			const { id } = req.params
+			const { name } = req.body
+
+			if (!id) {
+				return res.status(400).json({
+					message: 'Please provide all required fields',
+				})
+			}
+
+			const category = await Category.findById(id)
+
+			if (!category) {
+				return res.status(400).json({
+					message: 'Category not found',
+				})
+			}
+
+			if (name) {
+				category.name = name
+			}
+
+			await category.save().then(() => {
+				return res.status(200).json({
+					category,
+					message: 'Category updated successfully',
+				})
+			})
+		} catch (error) {
+			return res.status(500).json({
+				message: error.message,
+			})
+		}
+	},
+	deletePostById: async (req, res) => {
+		try {
+			const { id } = req.params
+
+			if (!id) {
+				return res.status(400).json({
+					message: 'Please provide all required fields',
+				})
+			}
+
+			const category = await Category.findById(id)
+
+			if (!category) {
+				return res.status(400).json({
+					message: 'Category not found',
+				})
+			}
+
+			await category.remove().then(() => {
+				return res.status(200).json({
+					message: 'Category deleted successfully',
+				})
+			})
+		} catch (error) {
+			return res.status(500).json({
+				message: error.message,
+			})
+		}
+	},
 }
 
 module.exports = categoryCtrl
